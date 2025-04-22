@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CameraView } from "./camera-view";
 
 interface ScanButtonProps {
   onScanComplete: (text: string) => void;
@@ -11,11 +12,16 @@ interface ScanButtonProps {
 
 export function ScanButton({ onScanComplete, className, variant = "default" }: ScanButtonProps) {
   const [isScanning, setIsScanning] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
 
   const handleScan = () => {
+    setShowCamera(true);
+  };
+
+  const handleCameraCapture = (imageData: string) => {
     setIsScanning(true);
     
-    // Simulate OCR process
+    // Simulate OCR process with the captured image
     setTimeout(() => {
       setIsScanning(false);
       // Mock OCR result based on bill type
@@ -41,15 +47,23 @@ export function ScanButton({ onScanComplete, className, variant = "default" }: S
   };
 
   return (
-    <Button 
-      onClick={handleScan} 
-      className={`${variantStyles[variant]} rounded-full h-16 w-16 ${className}`}
-      disabled={isScanning}
-    >
-      <Camera className="h-6 w-6" />
-      {isScanning && (
-        <span className="ml-2 animate-pulse">Scanning...</span>
-      )}
-    </Button>
+    <>
+      <Button 
+        onClick={handleScan} 
+        className={`${variantStyles[variant]} rounded-full h-16 w-16 ${className}`}
+        disabled={isScanning}
+      >
+        <Camera className="h-6 w-6" />
+        {isScanning && (
+          <span className="ml-2 animate-pulse">Scanning...</span>
+        )}
+      </Button>
+
+      <CameraView 
+        isOpen={showCamera}
+        onClose={() => setShowCamera(false)}
+        onCapture={handleCameraCapture}
+      />
+    </>
   );
 }

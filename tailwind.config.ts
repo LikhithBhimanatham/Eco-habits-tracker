@@ -19,6 +19,21 @@ export default {
 		},
 		extend: {
 			colors: {
+                ecoGreen: {
+                    light: '#E3F9E7',
+                    DEFAULT: '#4CAF50',
+                    dark: '#2E7D32',
+                },
+                ecoBlue: {
+                    light: '#E1F5FE',
+                    DEFAULT: '#03A9F4',
+                    dark: '#0277BD',
+                },
+                ecoEarth: {
+                    light: '#FFF3E0',
+                    DEFAULT: '#A1887F',
+                    dark: '#5D4037',
+                },
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

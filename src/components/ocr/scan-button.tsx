@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CameraView } from "./camera-view";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScanButtonProps {
   onScanComplete: (text: string) => void;
@@ -13,6 +14,7 @@ interface ScanButtonProps {
 export function ScanButton({ onScanComplete, className, variant = "default" }: ScanButtonProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const { toast } = useToast();
 
   const handleScan = () => {
     setShowCamera(true);
@@ -34,6 +36,11 @@ export function ScanButton({ onScanComplete, className, variant = "default" }: S
       } else if (variant === "petrol") {
         mockResult = "Fuel Receipt\nStation: EcoPetrol\nLiters: 32.5\nPrice per liter: $1.35\nTotal: $43.87\nDate: 05/06/2024";
       }
+      
+      toast({
+        title: "Scan Completed",
+        description: "Bill information successfully extracted",
+      });
       
       onScanComplete(mockResult);
     }, 2000);

@@ -1,19 +1,22 @@
 
 import { useState } from "react";
-import { Camera } from "lucide-react";
+import { Camera, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CameraView } from "./camera-view";
 import { useToast } from "@/hooks/use-toast";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface ScanButtonProps {
   onScanComplete: (text: string) => void;
+  onManualEntry: () => void;
   className?: string;
   variant?: "default" | "water" | "electricity" | "petrol";
 }
 
-export function ScanButton({ onScanComplete, className, variant = "default" }: ScanButtonProps) {
+export function ScanButton({ onScanComplete, onManualEntry, className, variant = "default" }: ScanButtonProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [inputMode, setInputMode] = useState<"scan" | "manual">("scan");
   const { toast } = useToast();
 
   const handleScan = () => {
@@ -46,6 +49,15 @@ export function ScanButton({ onScanComplete, className, variant = "default" }: S
     }, 2000);
   };
 
+  const handleInputModeChange = (value: string) => {
+    if (value === "manual") {
+      setInputMode("manual");
+      onManualEntry();
+    } else {
+      setInputMode("scan");
+    }
+  };
+
   const variantStyles = {
     default: "bg-primary hover:bg-primary/90",
     water: "bg-ecoBlue hover:bg-ecoBlue-dark",
@@ -55,16 +67,36 @@ export function ScanButton({ onScanComplete, className, variant = "default" }: S
 
   return (
     <>
-      <Button 
-        onClick={handleScan} 
-        className={`${variantStyles[variant]} rounded-full h-16 w-16 ${className}`}
-        disabled={isScanning}
-      >
-        <Camera className="h-6 w-6" />
-        {isScanning && (
-          <span className="ml-2 animate-pulse">Scanning...</span>
+      <div className="flex flex-col items-center gap-4">
+        <ToggleGroup 
+          type="single" 
+          value={inputMode}
+          onValueChange={handleInputModeChange}
+          className="border rounded-lg"
+        >
+          <ToggleGroupItem value="scan" aria-label="Scan Bill">
+            <Camera className="h-4 w-4 mr-2" />
+            Scan Bill
+          </ToggleGroupItem>
+          <ToggleGroupItem value="manual" aria-label="Manual Entry">
+            <PenLine className="h-4 w-4 mr-2" />
+            Manual Entry
+          </ToggleGroupItem>
+        </ToggleGroup>
+        
+        {inputMode === "scan" && (
+          <Button 
+            onClick={handleScan} 
+            className={`${variantStyles[variant]} rounded-full h-16 w-16 ${className}`}
+            disabled={isScanning}
+          >
+            <Camera className="h-6 w-6" />
+            {isScanning && (
+              <span className="ml-2 animate-pulse">Scanning...</span>
+            )}
+          </Button>
         )}
-      </Button>
+      </div>
 
       <CameraView 
         isOpen={showCamera}

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Zap, Upload, CheckCircle2 } from "lucide-react";
+import { Zap, Upload, CheckCircle2, PenLine } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
 import { ScanButton } from "@/components/ocr/scan-button";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const ElectricityBill = () => {
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isManualEntry, setIsManualEntry] = useState(false);
 
   // Form state (would be connected to actual form validation in a real app)
   const [usage, setUsage] = useState("");
@@ -45,12 +46,112 @@ const ElectricityBill = () => {
       // Reset after showing success
       setTimeout(() => {
         setScanResult(null);
+        setIsManualEntry(false);
         setIsSubmitted(false);
         setUsage("");
         setAmount("");
         setDate("");
       }, 3000);
     }, 1000);
+  };
+
+  const handleManualEntry = () => {
+    setScanResult(null);
+    setIsManualEntry(true);
+  };
+
+  const renderEntryForm = () => {
+    return (
+      <div className="space-y-6">
+        {scanResult && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-4">
+                <Label htmlFor="scan-result">OCR Scan Result</Label>
+                <Textarea 
+                  id="scan-result" 
+                  value={scanResult} 
+                  className="font-mono text-sm"
+                  rows={5}
+                  readOnly
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <h2 className="text-lg font-medium">
+              {isManualEntry 
+                ? "Enter Electricity Bill Details" 
+                : "Verify Extracted Information"}
+            </h2>
+            <Separator />
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="usage">Electricity Usage (kWh)</Label>
+                <Input 
+                  id="usage" 
+                  value={usage} 
+                  onChange={e => setUsage(e.target.value)}
+                  placeholder="Enter electricity usage in kilowatt-hours"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="amount">Bill Amount ($)</Label>
+                <Input 
+                  id="amount" 
+                  value={amount} 
+                  onChange={e => setAmount(e.target.value)}
+                  placeholder="Enter bill amount in dollars"
+                  type="number"
+                  step="0.01"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="date">Bill Date</Label>
+                <Input 
+                  id="date" 
+                  value={date} 
+                  onChange={e => setDate(e.target.value)}
+                  placeholder="DD/MM/YYYY"
+                />
+              </div>
+            </div>
+            
+            <div className="pt-4 flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setScanResult(null);
+                  setIsManualEntry(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={isSubmitting}
+                className="bg-ecoGreen hover:bg-ecoGreen-dark"
+              >
+                {isSubmitting ? (
+                  <>Processing...</>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Submit Bill
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   };
 
   return (
@@ -62,9 +163,9 @@ const ElectricityBill = () => {
           <header className="mb-8">
             <div className="flex items-center gap-3">
               <Zap className="h-8 w-8 text-ecoGreen" />
-              <h1 className="text-2xl font-bold text-gray-900">Electricity Bill Scanner</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Electricity Bill Tracker</h1>
             </div>
-            <p className="text-gray-600 mt-2">Track your electricity consumption by scanning your bill</p>
+            <p className="text-gray-600 mt-2">Track your electricity consumption by scanning or manually entering your bill</p>
           </header>
           
           {isSubmitted ? (
@@ -77,95 +178,20 @@ const ElectricityBill = () => {
                 </div>
               </CardContent>
             </Card>
-          ) : scanResult ? (
-            <div className="space-y-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="mb-4">
-                    <Label htmlFor="scan-result">OCR Scan Result</Label>
-                    <Textarea 
-                      id="scan-result" 
-                      value={scanResult} 
-                      className="font-mono text-sm"
-                      rows={5}
-                      readOnly
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="pt-6 space-y-4">
-                  <h2 className="text-lg font-medium">Verify Extracted Information</h2>
-                  <Separator />
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="usage">Electricity Usage (kWh)</Label>
-                      <Input 
-                        id="usage" 
-                        value={usage} 
-                        onChange={e => setUsage(e.target.value)}
-                        placeholder="Enter electricity usage in kilowatt-hours"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="amount">Bill Amount ($)</Label>
-                      <Input 
-                        id="amount" 
-                        value={amount} 
-                        onChange={e => setAmount(e.target.value)}
-                        placeholder="Enter bill amount in dollars"
-                        type="number"
-                        step="0.01"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="date">Bill Date</Label>
-                      <Input 
-                        id="date" 
-                        value={date} 
-                        onChange={e => setDate(e.target.value)}
-                        placeholder="DD/MM/YYYY"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setScanResult(null)}>
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={handleSubmit} 
-                      disabled={isSubmitting}
-                      className="bg-ecoGreen hover:bg-ecoGreen-dark"
-                    >
-                      {isSubmitting ? (
-                        <>Processing...</>
-                      ) : (
-                        <>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Submit Bill
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          ) : scanResult || isManualEntry ? (
+            renderEntryForm()
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="text-center mb-8">
-                <h2 className="text-xl font-semibold text-gray-800 mb-3">Scan Your Electricity Bill</h2>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Add Your Electricity Bill</h2>
                 <p className="text-gray-600 max-w-md mx-auto">
-                  Position your electricity bill clearly in the camera frame for the best OCR results
+                  Scan your bill or enter details manually to track your consumption
                 </p>
               </div>
               
               <ScanButton 
-                onScanComplete={handleScanComplete} 
+                onScanComplete={handleScanComplete}
+                onManualEntry={handleManualEntry}
                 variant="electricity" 
                 className="mb-8 h-20 w-20"
               />

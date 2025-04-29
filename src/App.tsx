@@ -4,7 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthWrapper } from "@/components/auth/AuthWrapper";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
 import WaterBill from "./pages/WaterBill";
 import ElectricityBill from "./pages/ElectricityBill";
 import PetrolBill from "./pages/PetrolBill";
@@ -21,16 +23,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/water-bill" element={<WaterBill />} />
-          <Route path="/electricity-bill" element={<ElectricityBill />} />
-          <Route path="/petrol-bill" element={<PetrolBill />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthWrapper>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/water-bill" element={<WaterBill />} />
+            <Route path="/electricity-bill" element={<ElectricityBill />} />
+            <Route path="/petrol-bill" element={<PetrolBill />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthWrapper>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

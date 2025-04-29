@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { User, KeyRound, Mail } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -15,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Define the schema for user profile
 const profileSchema = z.object({
@@ -34,6 +36,8 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export function UserProfileForm() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<ProfileFormValues | null>(null);
+  const [creatingNew, setCreatingNew] = useState(false);
   const { toast } = useToast();
 
   // Initialize form with default values
@@ -59,6 +63,10 @@ export function UserProfileForm() {
         password: "",
         notifications: profile.notifications !== undefined ? profile.notifications : true,
       });
+      setCurrentUser({
+        ...profile,
+        password: "••••••••" // Mask the actual password
+      });
       setIsLoggedIn(true);
     }
   }, [form]);
@@ -76,12 +84,17 @@ export function UserProfileForm() {
     
     localStorage.setItem("userProfile", JSON.stringify(profileToSave));
     setIsLoggedIn(true);
+    setCurrentUser({
+      ...profileToSave,
+      password: "••••••••" // Mask the password in UI
+    });
+    setCreatingNew(false);
     
     toast({
-      title: isLoggedIn ? "Profile Updated" : "Profile Created",
-      description: isLoggedIn ? 
-        "Your profile has been successfully updated." : 
-        "Your account has been created successfully.",
+      title: creatingNew ? "Profile Created" : "Profile Updated",
+      description: creatingNew ? 
+        "Your account has been created successfully." : 
+        "Your profile has been successfully updated.",
     });
   }
 
@@ -94,111 +107,203 @@ export function UserProfileForm() {
       notifications: true,
     });
     setIsLoggedIn(false);
+    setCurrentUser(null);
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
   };
 
+  const handleCreateNew = () => {
+    form.reset({
+      name: "",
+      email: "",
+      password: "",
+      notifications: true,
+    });
+    setCreatingNew(true);
+  };
+
+  const handleCancel = () => {
+    if (currentUser) {
+      form.reset({
+        name: currentUser.name,
+        email: currentUser.email,
+        password: "",
+        notifications: currentUser.notifications,
+      });
+    }
+    setCreatingNew(false);
+  };
+
   return (
     <div className="space-y-6 max-w-md mx-auto p-4 bg-white rounded-lg shadow">
       <div>
-        <h2 className="text-2xl font-bold">{isLoggedIn ? "Your Profile" : "Create Profile"}</h2>
+        <h2 className="text-2xl font-bold">
+          {creatingNew ? "Create New User" : isLoggedIn ? "Your Profile" : "Create Profile"}
+        </h2>
         <p className="text-muted-foreground">
-          {isLoggedIn 
-            ? "Manage your account details and notification preferences" 
-            : "Set up your account to track your utility usage"
+          {creatingNew 
+            ? "Set up a new account to track your utility usage" 
+            : isLoggedIn 
+              ? "Manage your account details and notification preferences"
+              : "Set up your account to track your utility usage"
           }
         </p>
       </div>
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      {isLoggedIn && !creatingNew && currentUser && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <User className="h-5 w-5 text-blue-600" />
+          <AlertTitle className="text-blue-800">Currently Logged In</AlertTitle>
+          <AlertDescription className="text-blue-700">
+            <div className="grid grid-cols-[80px_1fr] gap-1 mt-2">
+              <span className="font-medium">User ID:</span>
+              <span>{currentUser.name}</span>
+              
+              <span className="font-medium">Email:</span>
+              <span>{currentUser.email}</span>
+              
+              <span className="font-medium">Password:</span>
+              <span>{currentUser.password}</span>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {isLoggedIn && !creatingNew && (
+        <div className="flex space-x-4">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={handleCreateNew}
+          >
+            <User className="h-4 w-4" />
+            Create New User
+          </Button>
           
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="your@email.com" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Used for bill notifications and updates
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="notifications"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <input
-                    type="checkbox"
-                    checked={field.value}
-                    onChange={field.onChange}
-                    className="h-4 w-4 mt-1"
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Receive email notifications</FormLabel>
-                  <FormDescription>
-                    Get updates about bill due dates and conservation tips
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
-          
-          <div className="flex justify-between">
-            <Button type="submit">
-              {isLoggedIn ? "Update Profile" : "Create Profile"}
-            </Button>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:border-red-300" 
+            onClick={handleLogout}
+          >
+            Log Out
+          </Button>
+        </div>
+      )}
+      
+      {(creatingNew || !isLoggedIn) && (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                      <Input 
+                        placeholder="Enter your name" 
+                        className="pl-10" 
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
-            {isLoggedIn && (
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleLogout}
-              >
-                Log Out
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                      <Input 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        className="pl-10"
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Used for bill notifications and updates
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                      <Input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        className="pl-10"
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="notifications"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="h-4 w-4 mt-1"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Receive email notifications</FormLabel>
+                    <FormDescription>
+                      Get updates about bill due dates and conservation tips
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex justify-between">
+              <Button type="submit" className="flex items-center gap-2">
+                {creatingNew ? "Create User" : "Create Profile"}
               </Button>
-            )}
-          </div>
-        </form>
-      </Form>
+              
+              {creatingNew && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
+      )}
     </div>
   );
 }

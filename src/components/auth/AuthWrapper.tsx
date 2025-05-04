@@ -1,41 +1,12 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+
+import React from "react";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
 }
 
+// Modified AuthWrapper that no longer checks authentication
 export const AuthWrapper = ({ children }: AuthWrapperProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    // Check if user is authenticated
-    const authStatus = localStorage.getItem("isAuthenticated");
-    const isAuth = authStatus === "true";
-    setIsAuthenticated(isAuth);
-    
-    // If not authenticated and not on login page, redirect to login
-    if (!isAuth && location.pathname !== "/login") {
-      navigate("/login");
-    }
-    // If authenticated and on login page, redirect to home
-    else if (isAuth && location.pathname === "/login") {
-      navigate("/");
-    }
-  }, [navigate, location.pathname]);
-
-  // Show nothing while checking authentication status
-  if (isAuthenticated === null) {
-    return null;
-  }
-
-  // If on login page or authenticated, render children
-  if (location.pathname === "/login" || isAuthenticated) {
-    return <>{children}</>;
-  }
-
-  // Otherwise render nothing (will redirect in useEffect)
-  return null;
+  // Simply render the children without any authentication checks
+  return <>{children}</>;
 };

@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Tips from "./pages/Tips";
 import ConsumptionGoals from "./pages/ConsumptionGoals";
+import BillsSummary from "./pages/BillsSummary";
 import { useEffect } from "react";
 import { initializeDemoData } from "@/db/db-service";
 
@@ -43,6 +44,7 @@ const App = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/tips" element={<Tips />} />
               <Route path="/consumption-goals" element={<ConsumptionGoals />} />
+              <Route path="/bills-summary" element={<BillsSummary />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthWrapper>

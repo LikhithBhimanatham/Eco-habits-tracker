@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const ElectricityBill = () => {
   const [scanResult, setScanResult] = useState<string | null>(null);
@@ -20,6 +22,9 @@ const ElectricityBill = () => {
   const [usage, setUsage] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
+
+  // Check if all bill types are entered (would be fetched from a real database)
+  const [allBillsEntered, setAllBillsEntered] = useState(false);
 
   const handleScanComplete = (text: string) => {
     setScanResult(text);
@@ -42,6 +47,30 @@ const ElectricityBill = () => {
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
+      
+      // In a real app, we would check if all bill types have been entered
+      // For demo purposes, let's randomly decide if all bills are entered
+      const randomAllBills = Math.random() > 0.5;
+      setAllBillsEntered(randomAllBills);
+      
+      // Show appropriate toast message
+      if (randomAllBills) {
+        toast.success("All Bill Types Recorded!", {
+          description: "View your comprehensive consumption report to see savings opportunities.",
+          action: {
+            label: "View Report",
+            onClick: () => window.location.href = "/bills-summary",
+          },
+        });
+      } else {
+        toast.success("Electricity Bill Recorded Successfully", {
+          description: "Continue adding your other utility bills for a complete analysis.",
+          action: {
+            label: "View Goals",
+            onClick: () => window.location.href = "/consumption-goals",
+          },
+        });
+      }
       
       // Reset after showing success
       setTimeout(() => {
@@ -174,7 +203,30 @@ const ElectricityBill = () => {
                 <div className="flex flex-col items-center justify-center text-center py-8">
                   <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
                   <h2 className="text-xl font-semibold text-gray-800 mb-2">Bill Successfully Recorded!</h2>
-                  <p className="text-gray-600">You've earned 30 eco points for tracking your electricity usage.</p>
+                  <p className="text-gray-600 mb-4">You've earned 30 eco points for tracking your electricity usage.</p>
+                  
+                  {allBillsEntered ? (
+                    <Link to="/bills-summary">
+                      <Button className="bg-ecoGreen hover:bg-ecoGreen-dark mb-2">
+                        View Consumption Report
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to="/consumption-goals">
+                      <Button className="bg-ecoGreen hover:bg-ecoGreen-dark mb-2">
+                        View Consumption Goals
+                      </Button>
+                    </Link>
+                  )}
+                  
+                  {!allBillsEntered && (
+                    <div className="mt-4 bg-green-50 rounded-lg p-4 text-left max-w-md">
+                      <h3 className="font-medium text-gray-900 mb-1">Next Steps</h3>
+                      <p className="text-sm text-gray-600">
+                        For a complete analysis of your consumption patterns and potential savings, add your water and fuel bills too.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

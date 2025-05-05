@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Droplet, Upload, CheckCircle2, PenLine } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
@@ -22,6 +23,9 @@ const WaterBill = () => {
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
 
+  // Check if all bill types are entered (would be fetched from a real database)
+  const [allBillsEntered, setAllBillsEntered] = useState(false);
+
   const handleScanComplete = (text: string) => {
     setScanResult(text);
     
@@ -44,14 +48,29 @@ const WaterBill = () => {
       setIsSubmitting(false);
       setIsSubmitted(true);
       
-      // Show recommendation for consumption goals
-      toast.success("Bill Recorded Successfully", {
-        description: "Check your consumption goals to see recommended daily usage targets.",
-        action: {
-          label: "View Goals",
-          onClick: () => window.location.href = "/consumption-goals",
-        },
-      });
+      // In a real app, we would check if all bill types have been entered
+      // For demo purposes, let's randomly decide if all bills are entered
+      const randomAllBills = Math.random() > 0.5;
+      setAllBillsEntered(randomAllBills);
+      
+      // Show appropriate toast message
+      if (randomAllBills) {
+        toast.success("All Bill Types Recorded!", {
+          description: "View your comprehensive consumption report to see savings opportunities.",
+          action: {
+            label: "View Report",
+            onClick: () => window.location.href = "/bills-summary",
+          },
+        });
+      } else {
+        toast.success("Water Bill Recorded Successfully", {
+          description: "Continue adding your other utility bills for a complete analysis.",
+          action: {
+            label: "View Goals",
+            onClick: () => window.location.href = "/consumption-goals",
+          },
+        });
+      }
       
       // Reset after showing success
       setTimeout(() => {
@@ -185,11 +204,29 @@ const WaterBill = () => {
                   <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
                   <h2 className="text-xl font-semibold text-gray-800 mb-2">Bill Successfully Recorded!</h2>
                   <p className="text-gray-600 mb-4">You've earned 25 eco points for tracking your water usage.</p>
-                  <Link to="/consumption-goals">
-                    <Button className="bg-ecoBlue hover:bg-ecoBlue-dark">
-                      View Consumption Goals
-                    </Button>
-                  </Link>
+                  
+                  {allBillsEntered ? (
+                    <Link to="/bills-summary">
+                      <Button className="bg-ecoBlue hover:bg-ecoBlue-dark mb-2">
+                        View Consumption Report
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to="/consumption-goals">
+                      <Button className="bg-ecoBlue hover:bg-ecoBlue-dark mb-2">
+                        View Consumption Goals
+                      </Button>
+                    </Link>
+                  )}
+                  
+                  {!allBillsEntered && (
+                    <div className="mt-4 bg-blue-50 rounded-lg p-4 text-left max-w-md">
+                      <h3 className="font-medium text-gray-900 mb-1">Next Steps</h3>
+                      <p className="text-sm text-gray-600">
+                        For a complete analysis of your consumption patterns and potential savings, add your electricity and fuel bills too.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

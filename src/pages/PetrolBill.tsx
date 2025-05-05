@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Fuel, Upload, CheckCircle2, PenLine } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
@@ -8,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
 const PetrolBill = () => {
@@ -45,14 +46,12 @@ const PetrolBill = () => {
       setIsSubmitted(true);
       
       // Show recommendation for consumption goals
-      toast({
-        title: "Receipt Recorded Successfully",
+      toast.success("Receipt Recorded Successfully", {
         description: "Check your consumption goals to see recommended daily usage targets.",
-        action: (
-          <Link to="/consumption-goals">
-            <Button variant="outline" size="sm">View Goals</Button>
-          </Link>
-        )
+        action: {
+          label: "View Goals",
+          onClick: () => window.location.href = "/consumption-goals",
+        },
       });
       
       // Reset after showing success

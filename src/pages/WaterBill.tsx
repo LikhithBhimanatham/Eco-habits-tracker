@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
 const WaterBill = () => {
@@ -45,14 +45,12 @@ const WaterBill = () => {
       setIsSubmitted(true);
       
       // Show recommendation for consumption goals
-      toast({
-        title: "Bill Recorded Successfully",
+      toast.success("Bill Recorded Successfully", {
         description: "Check your consumption goals to see recommended daily usage targets.",
-        action: (
-          <Link to="/consumption-goals">
-            <Button variant="outline" size="sm">View Goals</Button>
-          </Link>
-        )
+        action: {
+          label: "View Goals",
+          onClick: () => window.location.href = "/consumption-goals",
+        },
       });
       
       // Reset after showing success

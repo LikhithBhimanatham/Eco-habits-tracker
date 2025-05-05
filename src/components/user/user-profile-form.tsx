@@ -15,6 +15,7 @@ export function UserProfileForm() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<ProfileFormValues | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   // Initialize form with default values
@@ -50,8 +51,23 @@ export function UserProfileForm() {
   }, [form]);
 
   function onSubmit(data: ProfileFormValues) {
+    setIsSubmitting(true);
+    
     if (creatingNew || !isLoggedIn) {
       try {
+        // Check if user already exists
+        const existingUser = userService.getByEmail(data.email);
+        
+        if (existingUser) {
+          toast({
+            title: "Error",
+            description: "An account with this email already exists.",
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        
         // Creating a new user
         const newUser = userService.create({
           name: data.name,
@@ -80,30 +96,42 @@ export function UserProfileForm() {
           description: error.message || "Failed to create account",
           variant: "destructive"
         });
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       // Updating existing user
       const currentUserId = authService.getCurrentUser()?.id;
       
       if (currentUserId) {
-        const updatedUser = userService.update(currentUserId, {
-          name: data.name,
-          email: data.email,
-          notifications: data.notifications,
-          // Only update password if provided
-          ...(data.password && data.password !== "••••••••" ? { password: data.password } : {})
-        });
-        
-        if (updatedUser) {
-          setCurrentUser({
-            ...updatedUser,
-            password: "••••••••" // Mask the password in UI
+        try {
+          const updatedUser = userService.update(currentUserId, {
+            name: data.name,
+            email: data.email,
+            notifications: data.notifications,
+            // Only update password if provided
+            ...(data.password && data.password !== "••••••••" ? { password: data.password } : {})
           });
           
+          if (updatedUser) {
+            setCurrentUser({
+              ...updatedUser,
+              password: "••••••••" // Mask the password in UI
+            });
+            
+            toast({
+              title: "Profile Updated",
+              description: "Your profile has been successfully updated.",
+            });
+          }
+        } catch (error: any) {
           toast({
-            title: "Profile Updated",
-            description: "Your profile has been successfully updated.",
+            title: "Error",
+            description: error.message || "Failed to update profile",
+            variant: "destructive"
           });
+        } finally {
+          setIsSubmitting(false);
         }
       }
     }
@@ -180,8 +208,14 @@ export function UserProfileForm() {
             <ProfileFormFields form={form} />
             
             <div className="flex justify-between">
-              <Button type="submit" className="flex items-center gap-2">
-                {creatingNew ? "Create User" : "Create Profile"}
+              <Button 
+                type="submit" 
+                className="flex items-center gap-2"
+                disabled={isSubmitting}
+              >
+                {isSubmitting 
+                  ? creatingNew ? "Creating..." : "Creating Profile..." 
+                  : creatingNew ? "Create User" : "Create Profile"}
               </Button>
               
               {creatingNew && (
@@ -189,6 +223,7 @@ export function UserProfileForm() {
                   type="button" 
                   variant="outline" 
                   onClick={handleCancel}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>

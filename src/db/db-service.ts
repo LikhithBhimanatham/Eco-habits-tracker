@@ -1,3 +1,4 @@
+
 import { User, WaterBill, ElectricityBill, PetrolBill, Notification } from './models';
 import { hashPassword, comparePassword } from '@/utils/password-utils';
 
@@ -261,6 +262,7 @@ export const authService = {
     
     // Compare provided password with stored hash
     if (!comparePassword(password, user.password)) {
+      console.log("Password comparison failed");
       throw new Error('Invalid email or password');
     }
     

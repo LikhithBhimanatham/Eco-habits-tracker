@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -41,6 +42,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,52 +67,83 @@ const Login = () => {
     },
   });
 
-  const handleLoginSubmit = (data: LoginFormValues) => {
+  // Reset errors when switching form types
+  useEffect(() => {
+    setFormError(null);
+  }, [isLogin]);
+
+  const handleLoginSubmit = async (data: LoginFormValues) => {
+    setIsSubmitting(true);
+    setFormError(null);
+    
     try {
-      setFormError(null);
       // Try to login with provided credentials
-      authService.login(data.email, data.password);
+      const user = authService.login(data.email, data.password);
       
-      // Navigate to the page they were trying to access, or home
-      navigate(from, { state: { successLogin: true } });
+      if (user) {
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${user.name}!`,
+        });
+        
+        // Navigate to the page they were trying to access, or home
+        navigate(from, { state: { successLogin: true } });
+      }
     } catch (error: any) {
+      console.error("Login error:", error);
       setFormError(error.message || "Invalid email or password.");
       toast({
         title: "Login Failed",
         description: error.message || "Invalid email or password.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleSignupSubmit = (data: SignupFormValues) => {
+  const handleSignupSubmit = async (data: SignupFormValues) => {
+    setIsSubmitting(true);
+    setFormError(null);
+    
     try {
-      setFormError(null);
+      // Check if user already exists
+      const existingUser = userService.getByEmail(data.email);
+      
+      if (existingUser) {
+        throw new Error("An account with this email already exists.");
+      }
+      
       // Create new user
-      userService.create({
+      const newUser = userService.create({
         name: data.name,
         email: data.email,
         password: data.password,
         notifications: true,
       });
       
-      // Auto login after successful registration
-      authService.login(data.email, data.password);
-      
-      toast({
-        title: "Account Created",
-        description: "Your account has been created successfully.",
-      });
-      
-      // Navigate to home page or original destination
-      navigate(from, { state: { successLogin: true } });
+      if (newUser) {
+        // Auto login after successful registration
+        authService.login(data.email, data.password);
+        
+        toast({
+          title: "Account Created",
+          description: "Your account has been created successfully.",
+        });
+        
+        // Navigate to home page or original destination
+        navigate(from, { state: { successLogin: true } });
+      }
     } catch (error: any) {
+      console.error("Registration error:", error);
       setFormError(error.message || "Could not create account.");
       toast({
         title: "Registration Failed",
         description: error.message || "Could not create account.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -182,8 +215,8 @@ const Login = () => {
                 )}
               />
               
-              <Button type="submit" className="w-full">
-                Login
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>
@@ -255,8 +288,8 @@ const Login = () => {
                 )}
               />
               
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
           </Form>
@@ -267,6 +300,8 @@ const Login = () => {
             variant="link" 
             onClick={() => {
               setIsLogin(!isLogin);
+              loginForm.reset();
+              signupForm.reset();
               setFormError(null);
             }}
             className="text-ecoBlue hover:text-ecoBlue-dark"

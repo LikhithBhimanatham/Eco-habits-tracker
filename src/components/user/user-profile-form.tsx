@@ -9,6 +9,7 @@ import { profileSchema, ProfileFormValues } from "./types";
 import { CurrentUserDisplay } from "./current-user-display";
 import { UserActionButtons } from "./user-action-buttons";
 import { ProfileFormFields } from "./profile-form-fields";
+import { authService, userService } from "@/db/db-service";
 
 export function UserProfileForm() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,55 +28,89 @@ export function UserProfileForm() {
     },
   });
 
-  // Check local storage for existing profile on component mount
+  // Check for existing profile on component mount
   useEffect(() => {
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      const profile = JSON.parse(savedProfile);
-      // Don't auto-fill the password for security
+    const loggedInUser = authService.getCurrentUser();
+    
+    if (loggedInUser) {
       form.reset({
-        name: profile.name || "",
-        email: profile.email || "",
-        password: "",
-        notifications: profile.notifications !== undefined ? profile.notifications : true,
+        name: loggedInUser.name || "",
+        email: loggedInUser.email || "",
+        password: "", // Don't auto-fill the password for security
+        notifications: loggedInUser.notifications !== undefined ? loggedInUser.notifications : true,
       });
+      
       setCurrentUser({
-        ...profile,
+        ...loggedInUser,
         password: "••••••••" // Mask the actual password
       });
+      
       setIsLoggedIn(true);
     }
   }, [form]);
 
   function onSubmit(data: ProfileFormValues) {
-    // Store in localStorage (this is just for demo, in a real app use a secure backend)
-    const profileToSave = {
-      name: data.name,
-      email: data.email,
-      // In a real app, never store raw passwords in localStorage
-      // This is only for demonstration
-      password: data.password,
-      notifications: data.notifications,
-    };
-    
-    localStorage.setItem("userProfile", JSON.stringify(profileToSave));
-    setIsLoggedIn(true);
-    setCurrentUser({
-      ...profileToSave,
-      password: "••••••••" // Mask the password in UI
-    });
-    setCreatingNew(false);
-    
-    toast({
-      title: creatingNew ? "Profile Created" : "Profile Updated",
-      description: creatingNew ? 
-        "Your account has been created successfully." : 
-        "Your profile has been successfully updated.",
-    });
+    if (creatingNew || !isLoggedIn) {
+      try {
+        // Creating a new user
+        const newUser = userService.create({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          notifications: data.notifications
+        });
+        
+        // Auto-login the user
+        authService.login(data.email, data.password);
+        
+        setIsLoggedIn(true);
+        setCurrentUser({
+          ...newUser,
+          password: "••••••••" // Mask the password in UI
+        });
+        setCreatingNew(false);
+        
+        toast({
+          title: "Profile Created",
+          description: "Your account has been created successfully.",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to create account",
+          variant: "destructive"
+        });
+      }
+    } else {
+      // Updating existing user
+      const currentUserId = authService.getCurrentUser()?.id;
+      
+      if (currentUserId) {
+        const updatedUser = userService.update(currentUserId, {
+          name: data.name,
+          email: data.email,
+          notifications: data.notifications,
+          // Only update password if provided
+          ...(data.password && data.password !== "••••••••" ? { password: data.password } : {})
+        });
+        
+        if (updatedUser) {
+          setCurrentUser({
+            ...updatedUser,
+            password: "••••••••" // Mask the password in UI
+          });
+          
+          toast({
+            title: "Profile Updated",
+            description: "Your profile has been successfully updated.",
+          });
+        }
+      }
+    }
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("userProfile");
+    authService.logout();
     form.reset({
       name: "",
       email: "",

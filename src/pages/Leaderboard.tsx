@@ -1,40 +1,63 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Award, Users } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
 import { LeaderboardCard, LeaderboardUser } from "@/components/leaderboard/leaderboard-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { userService, initializeDemoData } from "@/db/db-service";
+import { User } from "@/db/models";
 
 const Leaderboard = () => {
-  // Mock leaderboard data
-  const [weeklyLeaders] = useState<LeaderboardUser[]>([
-    { id: 1, name: "Emma Wilson", points: 245, savingsPercent: 84, rank: 1 },
-    { id: 2, name: "James Carter", points: 210, savingsPercent: 72, rank: 2 },
-    { id: 3, name: "Olivia Martinez", points: 185, savingsPercent: 65, rank: 3 },
-    { id: 4, name: "Noah Thompson", points: 160, savingsPercent: 58, rank: 4 },
-    { id: 5, name: "Sophia Lee", points: 145, savingsPercent: 51, rank: 5 }
-  ]);
+  const [weeklyLeaders, setWeeklyLeaders] = useState<LeaderboardUser[]>([]);
+  const [monthlyLeaders, setMonthlyLeaders] = useState<LeaderboardUser[]>([]);
+  const [allTimeLeaders, setAllTimeLeaders] = useState<LeaderboardUser[]>([]);
   
-  const [monthlyLeaders] = useState<LeaderboardUser[]>([
-    { id: 2, name: "James Carter", points: 820, savingsPercent: 88, rank: 1 },
-    { id: 1, name: "Emma Wilson", points: 790, savingsPercent: 82, rank: 2 },
-    { id: 5, name: "Sophia Lee", points: 735, savingsPercent: 77, rank: 3 },
-    { id: 3, name: "Olivia Martinez", points: 690, savingsPercent: 70, rank: 4 },
-    { id: 4, name: "Noah Thompson", points: 605, savingsPercent: 62, rank: 5 }
-  ]);
-  
-  const [allTimeLeaders] = useState<LeaderboardUser[]>([
-    { id: 5, name: "Sophia Lee", points: 3560, savingsPercent: 91, rank: 1 },
-    { id: 2, name: "James Carter", points: 3240, savingsPercent: 87, rank: 2 },
-    { id: 1, name: "Emma Wilson", points: 2980, savingsPercent: 80, rank: 3 },
-    { id: 4, name: "Noah Thompson", points: 2450, savingsPercent: 76, rank: 4 },
-    { id: 3, name: "Olivia Martinez", points: 2210, savingsPercent: 72, rank: 5 }
-  ]);
-
   // Find maximum points for progress bar scaling
-  const weeklyMaxPoints = Math.max(...weeklyLeaders.map(u => u.points));
-  const monthlyMaxPoints = Math.max(...monthlyLeaders.map(u => u.points));
-  const allTimeMaxPoints = Math.max(...allTimeLeaders.map(u => u.points));
+  const weeklyMaxPoints = Math.max(...(weeklyLeaders.length ? weeklyLeaders.map(u => u.points) : [0]));
+  const monthlyMaxPoints = Math.max(...(monthlyLeaders.length ? monthlyLeaders.map(u => u.points) : [0]));
+  const allTimeMaxPoints = Math.max(...(allTimeLeaders.length ? allTimeLeaders.map(u => u.points) : [0]));
+  
+  useEffect(() => {
+    // Initialize demo data if needed
+    initializeDemoData();
+    
+    // Get users and transform them to leaderboard format
+    const users = userService.getAll();
+    const transformedUsers = users.map((user, index) => ({
+      id: user.id,
+      name: user.name,
+      points: user.points,
+      savingsPercent: user.savingsPercent,
+      rank: index + 1,
+    }));
+    
+    // Sort by points (highest first)
+    const sortedUsers = [...transformedUsers].sort((a, b) => b.points - a.points);
+    
+    // For demo purposes, we'll use the same data but with different multipliers
+    const weeklyUsers = sortedUsers.map(user => ({
+      ...user,
+      points: Math.floor(user.points * 0.2), // 20% of total points for "weekly"
+    })).sort((a, b) => b.points - a.points)
+      .map((user, index) => ({ ...user, rank: index + 1 }))
+      .slice(0, 5);
+    
+    const monthlyUsers = sortedUsers.map(user => ({
+      ...user,
+      points: Math.floor(user.points * 0.5), // 50% of total points for "monthly"
+    })).sort((a, b) => b.points - a.points)
+      .map((user, index) => ({ ...user, rank: index + 1 }))
+      .slice(0, 5);
+    
+    // All time is just the full points
+    const allTimeUsers = sortedUsers
+      .map((user, index) => ({ ...user, rank: index + 1 }))
+      .slice(0, 5);
+    
+    setWeeklyLeaders(weeklyUsers);
+    setMonthlyLeaders(monthlyUsers);
+    setAllTimeLeaders(allTimeUsers);
+  }, []);
   
   return (
     <div className="flex min-h-screen bg-gray-50">

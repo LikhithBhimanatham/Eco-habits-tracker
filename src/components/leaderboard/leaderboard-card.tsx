@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export interface LeaderboardUser {
-  id: number;
+  id: string;  // Changed from number to string to match database structure
   name: string;
   points: number;
   avatar?: string;

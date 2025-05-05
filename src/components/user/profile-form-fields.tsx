@@ -32,10 +32,7 @@ export function ProfileFormFields({ form }: ProfileFormFieldsProps) {
                 <Input 
                   placeholder="Enter your username" 
                   className="pl-10" 
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  name={field.name}
+                  {...field}
                 />
               </div>
             </FormControl>
@@ -57,10 +54,7 @@ export function ProfileFormFields({ form }: ProfileFormFieldsProps) {
                   type="email" 
                   placeholder="your@email.com" 
                   className="pl-10"
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  name={field.name}
+                  {...field}
                 />
               </div>
             </FormControl>
@@ -85,10 +79,7 @@ export function ProfileFormFields({ form }: ProfileFormFieldsProps) {
                   type="password" 
                   placeholder="••••••••" 
                   className="pl-10"
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  name={field.name}
+                  {...field}
                 />
               </div>
             </FormControl>

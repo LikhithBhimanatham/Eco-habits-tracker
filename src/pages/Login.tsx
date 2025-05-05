@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Mail, KeyRound, User, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { authService, userService } from "@/db/db-service";
+import { authService, userService } from "@/services/index";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -78,7 +79,7 @@ const Login = () => {
     
     try {
       // Try to login with provided credentials
-      const user = authService.login(data.email, data.password);
+      const user = await authService.login(data.email, data.password);
       
       if (user) {
         toast({
@@ -108,14 +109,14 @@ const Login = () => {
     
     try {
       // Check if user already exists
-      const existingUser = userService.getByEmail(data.email);
+      const existingUser = await userService.getByEmail(data.email);
       
       if (existingUser) {
         throw new Error("An account with this email already exists.");
       }
       
       // Create new user
-      const newUser = userService.create({
+      const newUser = await userService.create({
         username: data.username,
         email: data.email,
         password: data.password,
@@ -124,7 +125,7 @@ const Login = () => {
       
       if (newUser) {
         // Auto login after successful registration
-        authService.login(data.email, data.password);
+        await authService.login(data.email, data.password);
         
         toast({
           title: "Account Created",
@@ -235,10 +236,7 @@ const Login = () => {
                         <Input 
                           placeholder="Choose a username" 
                           className="pl-10"
-                          value={field.value || ''}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </div>
                     </FormControl>
@@ -260,10 +258,7 @@ const Login = () => {
                           type="email" 
                           placeholder="you@example.com" 
                           className="pl-10"
-                          value={field.value || ''}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </div>
                     </FormControl>
@@ -285,10 +280,7 @@ const Login = () => {
                           type="password" 
                           placeholder="••••••••" 
                           className="pl-10"
-                          value={field.value || ''}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
+                          {...field}
                         />
                       </div>
                     </FormControl>

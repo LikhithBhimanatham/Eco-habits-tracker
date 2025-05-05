@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +9,7 @@ import { profileSchema, ProfileFormValues } from "./types";
 import { CurrentUserDisplay } from "./current-user-display";
 import { UserActionButtons } from "./user-action-buttons";
 import { ProfileFormFields } from "./profile-form-fields";
-import { authService, userService } from "@/db/db-service";
+import { authService, userService } from "@/services/index";
 
 export function UserProfileForm() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,32 +31,36 @@ export function UserProfileForm() {
 
   // Check for existing profile on component mount
   useEffect(() => {
-    const loggedInUser = authService.getCurrentUser();
+    const checkCurrentUser = async () => {
+      const loggedInUser = await authService.getCurrentUser();
+      
+      if (loggedInUser) {
+        form.reset({
+          username: loggedInUser.username || "",
+          email: loggedInUser.email || "",
+          password: "", // Don't auto-fill the password for security
+          notifications: loggedInUser.notifications !== undefined ? loggedInUser.notifications : true,
+        });
+        
+        setCurrentUser({
+          ...loggedInUser,
+          password: "••••••••" // Mask the actual password
+        });
+        
+        setIsLoggedIn(true);
+      }
+    };
     
-    if (loggedInUser) {
-      form.reset({
-        username: loggedInUser.username || "",
-        email: loggedInUser.email || "",
-        password: "", // Don't auto-fill the password for security
-        notifications: loggedInUser.notifications !== undefined ? loggedInUser.notifications : true,
-      });
-      
-      setCurrentUser({
-        ...loggedInUser,
-        password: "••••••••" // Mask the actual password
-      });
-      
-      setIsLoggedIn(true);
-    }
+    checkCurrentUser();
   }, [form]);
 
-  function onSubmit(data: ProfileFormValues) {
+  async function onSubmit(data: ProfileFormValues) {
     setIsSubmitting(true);
     
     if (creatingNew || !isLoggedIn) {
       try {
         // Check if user already exists
-        const existingUser = userService.getByEmail(data.email);
+        const existingUser = await userService.getByEmail(data.email);
         
         if (existingUser) {
           toast({
@@ -68,7 +73,7 @@ export function UserProfileForm() {
         }
         
         // Creating a new user
-        const newUser = userService.create({
+        const newUser = await userService.create({
           username: data.username,
           email: data.email,
           password: data.password,
@@ -76,7 +81,7 @@ export function UserProfileForm() {
         });
         
         // Auto-login the user
-        authService.login(data.email, data.password);
+        await authService.login(data.email, data.password);
         
         setIsLoggedIn(true);
         setCurrentUser({
@@ -100,11 +105,11 @@ export function UserProfileForm() {
       }
     } else {
       // Updating existing user
-      const currentUserId = authService.getCurrentUser()?.id;
+      const currentUser = await authService.getCurrentUser();
       
-      if (currentUserId) {
+      if (currentUser?.id) {
         try {
-          const updatedUser = userService.update(currentUserId, {
+          const updatedUser = await userService.update(currentUser.id, {
             username: data.username,
             email: data.email,
             notifications: data.notifications,
@@ -136,8 +141,8 @@ export function UserProfileForm() {
     }
   }
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
     form.reset({
       username: "",
       email: "",

@@ -1,20 +1,52 @@
-
-import { Droplet, Zap, Fuel, Award, BarChart, Lightbulb } from "lucide-react";
+import { Droplet, Zap, Fuel, Award, BarChart, Lightbulb, LogOut } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { authService } from "@/services/index";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout Failed",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Navbar className="hidden md:flex" />
       
       <main className="flex-1 pt-6 px-4 pb-20 md:pb-6 md:pl-24">
         <div className="max-w-6xl mx-auto">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Eco Habits Tracker</h1>
-            <p className="text-gray-600 mt-2">Track your bills, reduce consumption, save the planet</p>
+          <header className="mb-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Eco Habits Tracker</h1>
+              <p className="text-gray-600 mt-2">Track your bills, reduce consumption, save the planet</p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </header>
           
           <section className="mb-8">

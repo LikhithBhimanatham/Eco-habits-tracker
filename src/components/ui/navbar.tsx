@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Home, Droplet, Zap, Fuel, Award, Bell, LogOut } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
-import { authService } from "@/db/db-service";
+import { authService } from "@/services/index";
 import { useToast } from "@/hooks/use-toast";
 
 interface NavbarProps {
@@ -14,8 +14,8 @@ export function Navbar({ className }: NavbarProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",

@@ -19,9 +19,16 @@ const signupSchema = z.object({
   username: z.string().min(3, {
     message: "Username must be at least 3 characters.",
   }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
+  email: z.string()
+    .email({
+      message: "Please enter a valid email address.",
+    })
+    .refine((email) => {
+      // Check if it's a gmail account
+      return email.toLowerCase().endsWith('@gmail.com');
+    }, {
+      message: "Only Gmail accounts are allowed (example@gmail.com).",
+    }),
   password: z.string().min(6, {
     message: "Password must be at least 6 characters.",
   }),
@@ -138,7 +145,7 @@ export function SignupForm({ onSwitchForm }: SignupFormProps) {
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                     <Input 
                       type="email" 
-                      placeholder="you@example.com" 
+                      placeholder="you@gmail.com" 
                       className="pl-10"
                       {...field}
                     />

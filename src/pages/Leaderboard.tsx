@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Award, Users } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
 import { LeaderboardCard, LeaderboardUser } from "@/components/leaderboard/leaderboard-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { userService } from "@/services/api-service";
+import { userService } from "@/services";
 import { User } from "@/db/models";
 
 const Leaderboard = () => {

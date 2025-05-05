@@ -17,6 +17,14 @@ export const AuthWrapper = () => {
         description: "Welcome to Eco Habits Tracker!",
       });
     }
+    
+    // Check if logged out
+    if (location.state?.loggedOut) {
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+    }
   }, [location.state, toast]);
 
   // Redirect to login if not authenticated

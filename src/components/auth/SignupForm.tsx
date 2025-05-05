@@ -6,13 +6,14 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Mail, KeyRound, User } from "lucide-react";
+import { User, Mail, KeyRound } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { authService, userService } from "@/services/index";
+import { authService } from "@/services/index";
 
 // Define the schema for signup
 const signupSchema = z.object({
@@ -32,6 +33,7 @@ const signupSchema = z.object({
   password: z.string().min(6, {
     message: "Password must be at least 6 characters.",
   }),
+  notifications: z.boolean().default(true),
 });
 
 export type SignupFormValues = z.infer<typeof signupSchema>;
@@ -45,8 +47,6 @@ export function SignupForm({ onSwitchForm }: SignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from || "/";
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -54,6 +54,7 @@ export function SignupForm({ onSwitchForm }: SignupFormProps) {
       username: "",
       email: "",
       password: "",
+      notifications: true,
     },
   });
 
@@ -62,39 +63,28 @@ export function SignupForm({ onSwitchForm }: SignupFormProps) {
     setFormError(null);
     
     try {
-      // Check if user already exists
-      const existingUser = await userService.getByEmail(data.email);
-      
-      if (existingUser) {
-        throw new Error("An account with this email already exists.");
-      }
-      
-      // Create new user
-      const newUser = await userService.create({
+      // Register the user directly using the auth service
+      const user = await authService.signup({
         username: data.username,
         email: data.email,
         password: data.password,
-        notifications: true,
+        notifications: data.notifications
       });
       
-      if (newUser) {
-        // Auto login after successful registration
-        await authService.login(data.email, data.password);
-        
-        toast({
-          title: "Account Created",
-          description: "Your account has been created successfully.",
-        });
-        
-        // Navigate to home page or original destination
-        navigate(from, { state: { successLogin: true } });
-      }
+      toast({
+        title: "Account Created",
+        description: `Welcome to Eco Habits, ${data.username}!`,
+      });
+      
+      // Navigate to the dashboard
+      navigate("/", { replace: true });
+      
     } catch (error: any) {
       console.error("Registration error:", error);
-      setFormError(error.message || "Could not create account.");
+      setFormError(error.message || "Failed to create account. Please try again.");
       toast({
         title: "Registration Failed",
-        description: error.message || "Could not create account.",
+        description: error.message || "Failed to create account. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -123,9 +113,9 @@ export function SignupForm({ onSwitchForm }: SignupFormProps) {
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                     <Input 
-                      placeholder="Choose a username" 
+                      placeholder="johnsmith" 
                       className="pl-10"
-                      {...field}
+                      {...field} 
                     />
                   </div>
                 </FormControl>
@@ -169,11 +159,32 @@ export function SignupForm({ onSwitchForm }: SignupFormProps) {
                       type="password" 
                       placeholder="••••••••" 
                       className="pl-10"
-                      {...field}
+                      {...field} 
                     />
                   </div>
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="notifications"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Email notifications</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Receive bill reminders and savings tips
+                  </p>
+                </div>
               </FormItem>
             )}
           />
@@ -189,7 +200,7 @@ export function SignupForm({ onSwitchForm }: SignupFormProps) {
               className="text-ecoBlue hover:text-ecoBlue-dark"
               type="button"
             >
-              Already have an account? Log in
+              Already have an account? Login
             </Button>
           </div>
         </form>

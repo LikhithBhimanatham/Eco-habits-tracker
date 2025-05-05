@@ -11,6 +11,7 @@ import {
   FormDescription,
   FormMessage,
 } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ProfileFormFieldsProps {
   form: UseFormReturn<ProfileFormValues>;
@@ -93,12 +94,12 @@ export function ProfileFormFields({ form }: ProfileFormFieldsProps) {
         render={({ field }) => (
           <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
             <FormControl>
-              <input
-                type="checkbox"
-                checked={field.value}
-                onChange={field.onChange}
-                className="h-4 w-4 mt-1"
-              />
+              <div className="h-4 w-4">
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </div>
             </FormControl>
             <div className="space-y-1 leading-none">
               <FormLabel>Receive email notifications</FormLabel>

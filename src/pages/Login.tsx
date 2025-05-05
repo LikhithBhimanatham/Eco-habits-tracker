@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +17,7 @@ import { Mail, KeyRound, User, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authService, userService } from "@/db/db-service";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Define the schema for login
 const loginSchema = z.object({
@@ -235,7 +235,10 @@ const Login = () => {
                         <Input 
                           placeholder="Your name" 
                           className="pl-10"
-                          {...field} 
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
                         />
                       </div>
                     </FormControl>
@@ -257,7 +260,10 @@ const Login = () => {
                           type="email" 
                           placeholder="you@example.com" 
                           className="pl-10"
-                          {...field} 
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
                         />
                       </div>
                     </FormControl>
@@ -279,7 +285,10 @@ const Login = () => {
                           type="password" 
                           placeholder="••••••••" 
                           className="pl-10"
-                          {...field} 
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
                         />
                       </div>
                     </FormControl>

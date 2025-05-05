@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,9 +13,10 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Mail, KeyRound, User } from "lucide-react";
+import { Mail, KeyRound, User, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authService, userService } from "@/db/db-service";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Define the schema for login
 const loginSchema = z.object({
@@ -40,6 +40,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,12 +67,14 @@ const Login = () => {
 
   const handleLoginSubmit = (data: LoginFormValues) => {
     try {
+      setFormError(null);
       // Try to login with provided credentials
       authService.login(data.email, data.password);
       
       // Navigate to the page they were trying to access, or home
       navigate(from, { state: { successLogin: true } });
     } catch (error: any) {
+      setFormError(error.message || "Invalid email or password.");
       toast({
         title: "Login Failed",
         description: error.message || "Invalid email or password.",
@@ -82,6 +85,7 @@ const Login = () => {
 
   const handleSignupSubmit = (data: SignupFormValues) => {
     try {
+      setFormError(null);
       // Create new user
       userService.create({
         name: data.name,
@@ -101,6 +105,7 @@ const Login = () => {
       // Navigate to home page or original destination
       navigate(from, { state: { successLogin: true } });
     } catch (error: any) {
+      setFormError(error.message || "Could not create account.");
       toast({
         title: "Registration Failed",
         description: error.message || "Could not create account.",
@@ -122,6 +127,13 @@ const Login = () => {
               : "Join our community of eco-conscious individuals"}
           </p>
         </div>
+
+        {formError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
+        )}
 
         {isLogin ? (
           <Form {...loginForm}>
@@ -253,7 +265,10 @@ const Login = () => {
         <div className="mt-6 text-center">
           <Button 
             variant="link" 
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setFormError(null);
+            }}
             className="text-ecoBlue hover:text-ecoBlue-dark"
           >
             {isLogin ? "Need an account? Sign up" : "Already have an account? Log in"}

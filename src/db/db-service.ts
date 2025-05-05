@@ -1,5 +1,5 @@
-
 import { User, WaterBill, ElectricityBill, PetrolBill, Notification } from './models';
+import { hashPassword, comparePassword } from '@/utils/password-utils';
 
 // Database collections (tables)
 const COLLECTIONS = {
@@ -34,9 +34,13 @@ export const userService = {
       throw new Error('User with this email already exists');
     }
     
+    // Hash the password before storing
+    const hashedPassword = hashPassword(userData.password);
+    
     const newUser: User = {
       id: generateId(),
       ...userData,
+      password: hashedPassword, // Store hashed password instead of plain text
       points: 0,
       savingsPercent: 0,
       createdAt: new Date().toISOString()
@@ -44,7 +48,10 @@ export const userService = {
     
     users.push(newUser);
     saveCollection(COLLECTIONS.USERS, users);
-    return newUser;
+    
+    // Return user without sensitive data
+    const { password, ...userWithoutPassword } = newUser;
+    return { ...userWithoutPassword, password: '••••••••' } as User;
   },
   
   getById: (id: string): User | null => {
@@ -63,10 +70,18 @@ export const userService = {
     
     if (index === -1) return null;
     
+    // Hash password if it's being updated
+    if (userData.password) {
+      userData.password = hashPassword(userData.password);
+    }
+    
     // Update user data
     users[index] = { ...users[index], ...userData };
     saveCollection(COLLECTIONS.USERS, users);
-    return users[index];
+    
+    // Return user without sensitive data
+    const { password, ...userWithoutPassword } = users[index];
+    return { ...userWithoutPassword, password: '••••••••' } as User;
   },
   
   delete: (id: string): boolean => {
@@ -240,13 +255,21 @@ export const authService = {
   login: (email: string, password: string): User => {
     const user = userService.getByEmail(email);
     
-    if (!user || user.password !== password) {
+    if (!user) {
+      throw new Error('Invalid email or password');
+    }
+    
+    // Use password comparison function instead of direct comparison
+    if (!comparePassword(password, user.password)) {
       throw new Error('Invalid email or password');
     }
     
     // Store current user ID in session
     sessionStorage.setItem('currentUserId', user.id);
-    return user;
+    
+    // Return user without sensitive data
+    const { password: pass, ...userWithoutPassword } = user;
+    return { ...userWithoutPassword, password: '••••••••' } as User;
   },
   
   logout: (): void => {

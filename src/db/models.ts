@@ -4,7 +4,7 @@
 // User model
 export interface User {
   id: string;
-  name: string;
+  username: string;
   email: string;
   password: string; // In a real DB, this would be hashed
   notifications: boolean;

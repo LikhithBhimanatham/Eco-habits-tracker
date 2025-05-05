@@ -22,17 +22,20 @@ export function ProfileFormFields({ form }: ProfileFormFieldsProps) {
     <>
       <FormField
         control={form.control}
-        name="name"
+        name="username"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Name</FormLabel>
+            <FormLabel>Username</FormLabel>
             <FormControl>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                 <Input 
-                  placeholder="Enter your name" 
+                  placeholder="Enter your username" 
                   className="pl-10" 
-                  {...field} 
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
                 />
               </div>
             </FormControl>
@@ -54,7 +57,10 @@ export function ProfileFormFields({ form }: ProfileFormFieldsProps) {
                   type="email" 
                   placeholder="your@email.com" 
                   className="pl-10"
-                  {...field} 
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
                 />
               </div>
             </FormControl>
@@ -79,7 +85,10 @@ export function ProfileFormFields({ form }: ProfileFormFieldsProps) {
                   type="password" 
                   placeholder="••••••••" 
                   className="pl-10"
-                  {...field} 
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
                 />
               </div>
             </FormControl>

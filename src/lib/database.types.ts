@@ -13,7 +13,7 @@ export interface Database {
       users: {
         Row: {
           id: string
-          name: string
+          username: string
           email: string
           password: string // In a real application this would be handled by Supabase Auth
           notifications: boolean
@@ -23,7 +23,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          name: string
+          username: string
           email: string
           password?: string
           notifications?: boolean
@@ -32,7 +32,7 @@ export interface Database {
           created_at?: string
         }
         Update: {
-          name?: string
+          username?: string
           email?: string
           password?: string
           notifications?: boolean

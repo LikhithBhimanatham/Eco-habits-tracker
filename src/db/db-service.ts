@@ -1,4 +1,3 @@
-
 import { User, WaterBill, ElectricityBill, PetrolBill, Notification } from './models';
 import { hashPassword, comparePassword } from '@/utils/password-utils';
 
@@ -303,31 +302,31 @@ export const initializeDemoData = (): void => {
   // Create demo users
   const users = [
     {
-      name: "Emma Wilson",
+      username: "EmmaW",
       email: "emma@example.com",
       password: "password123",
       notifications: true
     },
     {
-      name: "James Carter",
+      username: "JamesC",
       email: "james@example.com",
       password: "password123",
       notifications: true
     },
     {
-      name: "Olivia Martinez",
+      username: "OliviaM",
       email: "olivia@example.com",
       password: "password123",
       notifications: false
     },
     {
-      name: "Noah Thompson",
+      username: "NoahT",
       email: "noah@example.com",
       password: "password123",
       notifications: true
     },
     {
-      name: "Sophia Lee",
+      username: "SophiaL",
       email: "sophia@example.com",
       password: "password123",
       notifications: true

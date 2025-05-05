@@ -21,7 +21,7 @@ export function UserProfileForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
       notifications: true,
@@ -34,7 +34,7 @@ export function UserProfileForm() {
     
     if (loggedInUser) {
       form.reset({
-        name: loggedInUser.name || "",
+        username: loggedInUser.username || "",
         email: loggedInUser.email || "",
         password: "", // Don't auto-fill the password for security
         notifications: loggedInUser.notifications !== undefined ? loggedInUser.notifications : true,
@@ -69,7 +69,7 @@ export function UserProfileForm() {
         
         // Creating a new user
         const newUser = userService.create({
-          name: data.name,
+          username: data.username,
           email: data.email,
           password: data.password,
           notifications: data.notifications
@@ -105,7 +105,7 @@ export function UserProfileForm() {
       if (currentUserId) {
         try {
           const updatedUser = userService.update(currentUserId, {
-            name: data.name,
+            username: data.username,
             email: data.email,
             notifications: data.notifications,
             // Only update password if provided
@@ -139,7 +139,7 @@ export function UserProfileForm() {
   const handleLogout = () => {
     authService.logout();
     form.reset({
-      name: "",
+      username: "",
       email: "",
       password: "",
       notifications: true,
@@ -154,7 +154,7 @@ export function UserProfileForm() {
 
   const handleCreateNew = () => {
     form.reset({
-      name: "",
+      username: "",
       email: "",
       password: "",
       notifications: true,
@@ -165,7 +165,7 @@ export function UserProfileForm() {
   const handleCancel = () => {
     if (currentUser) {
       form.reset({
-        name: currentUser.name,
+        username: currentUser.username,
         email: currentUser.email,
         password: "",
         notifications: currentUser.notifications,

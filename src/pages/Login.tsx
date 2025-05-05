@@ -31,8 +31,8 @@ const loginSchema = z.object({
 
 // Define the schema for signup which extends login schema
 const signupSchema = loginSchema.extend({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+  username: z.string().min(3, {
+    message: "Username must be at least 3 characters.",
   }),
 });
 
@@ -61,7 +61,7 @@ const Login = () => {
   const signupForm = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
     },
@@ -116,7 +116,7 @@ const Login = () => {
       
       // Create new user
       const newUser = userService.create({
-        name: data.name,
+        username: data.username,
         email: data.email,
         password: data.password,
         notifications: true,
@@ -225,15 +225,15 @@ const Login = () => {
             <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-4">
               <FormField
                 control={signupForm.control}
-                name="name"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                         <Input 
-                          placeholder="Your name" 
+                          placeholder="Choose a username" 
                           className="pl-10"
                           value={field.value || ''}
                           onChange={field.onChange}

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, isMockSupabase } from '@/lib/supabase';
 import { User, WaterBill, ElectricityBill, PetrolBill, Notification } from '@/db/models';
 
 // Helper functions
@@ -9,6 +9,31 @@ const generateId = (): string => {
 // User operations
 export const userService = {
   create: async (userData: Omit<User, 'id' | 'points' | 'savingsPercent' | 'createdAt'>): Promise<User> => {
+    // Check if using mock Supabase
+    if (isMockSupabase) {
+      console.warn("Using mock Supabase client. Connect to a real Supabase instance for production use.");
+      
+      // Mock implementation
+      const mockUser = {
+        id: generateId(),
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        notifications: userData.notifications,
+        points: 0,
+        savingsPercent: 0,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Store in localStorage
+      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      existingUsers.push(mockUser);
+      localStorage.setItem('users', JSON.stringify(existingUsers));
+      
+      return mockUser;
+    }
+    
+    // Real Supabase implementation
     // Check if email already exists
     const { data: existingUsers } = await supabase
       .from('users')
@@ -135,6 +160,68 @@ export const userService = {
   },
   
   getAll: async (): Promise<User[]> => {
+    // Check if using mock Supabase
+    if (isMockSupabase) {
+      console.warn("Using mock Supabase client. Connect to a real Supabase instance for production use.");
+      
+      // Return mock data
+      const mockUsers = [
+        {
+          id: "1",
+          name: "Emma Wilson",
+          email: "emma@example.com",
+          password: "password123",
+          notifications: true,
+          points: 850,
+          savingsPercent: 75,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "2",
+          name: "James Carter",
+          email: "james@example.com",
+          password: "password123",
+          notifications: true,
+          points: 920,
+          savingsPercent: 80,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "3",
+          name: "Olivia Martinez",
+          email: "olivia@example.com",
+          password: "password123",
+          notifications: false,
+          points: 750,
+          savingsPercent: 65,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "4",
+          name: "Noah Thompson",
+          email: "noah@example.com",
+          password: "password123",
+          notifications: true,
+          points: 680,
+          savingsPercent: 70,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "5",
+          name: "Sophia Lee",
+          email: "sophia@example.com",
+          password: "password123",
+          notifications: true,
+          points: 890,
+          savingsPercent: 78,
+          createdAt: new Date().toISOString()
+        }
+      ];
+      
+      return mockUsers;
+    }
+    
+    // Real Supabase implementation
     const { data, error } = await supabase
       .from('users')
       .select('*');
@@ -783,6 +870,12 @@ export const authService = {
 
 // Function to initialize demo data in Supabase tables
 export const initializeDemoData = async (): Promise<void> => {
+  // Skip initialization if using mock Supabase
+  if (isMockSupabase) {
+    console.warn("Using mock Supabase client. Demo data will be provided directly in service methods.");
+    return;
+  }
+  
   // Check if data is already initialized
   const { data: existingUsers } = await supabase
     .from('users')

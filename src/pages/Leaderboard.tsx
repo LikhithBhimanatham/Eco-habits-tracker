@@ -3,7 +3,7 @@ import { Award, Users } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
 import { LeaderboardCard, LeaderboardUser } from "@/components/leaderboard/leaderboard-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { userService, initializeDemoData } from "@/services/api-service";
+import { userService } from "@/services/api-service";
 import { User } from "@/db/models";
 
 const Leaderboard = () => {
@@ -20,9 +20,6 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchLeaderboardData = async () => {
       try {
-        // Initialize demo data in Supabase if needed
-        await initializeDemoData();
-        
         // Get users and transform them to leaderboard format
         const users = await userService.getAll();
         const transformedUsers = users.map((user, index) => ({

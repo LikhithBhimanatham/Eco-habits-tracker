@@ -40,7 +40,7 @@ export const userService = {
     const newUser: User = {
       id: generateId(),
       ...userData,
-      password: hashedPassword, // Store hashed password instead of plain text
+      password: hashedPassword, // Store hashed password
       points: 0,
       savingsPercent: 0,
       createdAt: new Date().toISOString()
@@ -49,7 +49,7 @@ export const userService = {
     users.push(newUser);
     saveCollection(COLLECTIONS.USERS, users);
     
-    // Return user without sensitive data
+    // Return user without actual password
     const { password, ...userWithoutPassword } = newUser;
     return { ...userWithoutPassword, password: '••••••••' } as User;
   },
@@ -70,8 +70,8 @@ export const userService = {
     
     if (index === -1) return null;
     
-    // Hash password if it's being updated
-    if (userData.password) {
+    // Hash password if it's being updated and not the masked placeholder
+    if (userData.password && userData.password !== '••••••••') {
       userData.password = hashPassword(userData.password);
     }
     
@@ -79,7 +79,7 @@ export const userService = {
     users[index] = { ...users[index], ...userData };
     saveCollection(COLLECTIONS.USERS, users);
     
-    // Return user without sensitive data
+    // Return user without actual password
     const { password, ...userWithoutPassword } = users[index];
     return { ...userWithoutPassword, password: '••••••••' } as User;
   },
@@ -259,15 +259,15 @@ export const authService = {
       throw new Error('Invalid email or password');
     }
     
-    // Use password comparison function instead of direct comparison
+    // Compare provided password with stored hash
     if (!comparePassword(password, user.password)) {
       throw new Error('Invalid email or password');
     }
     
-    // Store current user ID in session
+    // Store current user ID in session storage (more secure than localStorage for sensitive data)
     sessionStorage.setItem('currentUserId', user.id);
     
-    // Return user without sensitive data
+    // Return user without exposing the password hash
     const { password: pass, ...userWithoutPassword } = user;
     return { ...userWithoutPassword, password: '••••••••' } as User;
   },
@@ -280,7 +280,12 @@ export const authService = {
     const userId = sessionStorage.getItem('currentUserId');
     if (!userId) return null;
     
-    return userService.getById(userId);
+    const user = userService.getById(userId);
+    if (!user) return null;
+    
+    // Return user without exposing the password hash
+    const { password, ...userWithoutPassword } = user;
+    return { ...userWithoutPassword, password: '••••••••' } as User;
   },
   
   isAuthenticated: (): boolean => {

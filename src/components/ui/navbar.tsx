@@ -15,12 +15,21 @@ export function Navbar({ className }: NavbarProps) {
   const { toast } = useToast();
 
   const handleLogout = async () => {
-    await authService.logout();
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
-    navigate('/login');
+    try {
+      await authService.logout();
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout Failed",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

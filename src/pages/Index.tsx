@@ -1,5 +1,5 @@
 
-import { Droplet, Zap, Fuel, Award, TrendingUp, TrendingDown } from "lucide-react";
+import { Droplet, Zap, Fuel, Award, TrendingUp, TrendingDown, BarChart } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,12 @@ const Index = () => {
                 <Button variant="outline" className="w-full h-28 flex flex-col p-4 border-2 hover:border-amber-400 hover:text-amber-400">
                   <Award className="h-8 w-8 mb-2 text-amber-400" />
                   <span>View Leaderboard</span>
+                </Button>
+              </Link>
+              <Link to="/consumption-goals" className="no-underline">
+                <Button variant="outline" className="w-full h-28 flex flex-col p-4 border-2 hover:border-ecoGreen hover:text-ecoGreen">
+                  <BarChart className="h-8 w-8 mb-2 text-ecoGreen" />
+                  <span>Daily Consumption Goals</span>
                 </Button>
               </Link>
             </div>

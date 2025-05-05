@@ -13,6 +13,8 @@ import Leaderboard from "./pages/Leaderboard";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Tips from "./pages/Tips";
+import ConsumptionGoals from "./pages/ConsumptionGoals";
 import { useEffect } from "react";
 import { initializeDemoData } from "@/db/db-service";
 
@@ -39,6 +41,8 @@ const App = () => {
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/tips" element={<Tips />} />
+              <Route path="/consumption-goals" element={<ConsumptionGoals />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthWrapper>

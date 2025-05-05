@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Droplet, Upload, CheckCircle2, PenLine } from "lucide-react";
 import { Navbar } from "@/components/ui/navbar";
@@ -9,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 const WaterBill = () => {
   const [scanResult, setScanResult] = useState<string | null>(null);
@@ -42,6 +43,17 @@ const WaterBill = () => {
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
+      
+      // Show recommendation for consumption goals
+      toast({
+        title: "Bill Recorded Successfully",
+        description: "Check your consumption goals to see recommended daily usage targets.",
+        action: (
+          <Link to="/consumption-goals">
+            <Button variant="outline" size="sm">View Goals</Button>
+          </Link>
+        )
+      });
       
       // Reset after showing success
       setTimeout(() => {
@@ -174,7 +186,12 @@ const WaterBill = () => {
                 <div className="flex flex-col items-center justify-center text-center py-8">
                   <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
                   <h2 className="text-xl font-semibold text-gray-800 mb-2">Bill Successfully Recorded!</h2>
-                  <p className="text-gray-600">You've earned 25 eco points for tracking your water usage.</p>
+                  <p className="text-gray-600 mb-4">You've earned 25 eco points for tracking your water usage.</p>
+                  <Link to="/consumption-goals">
+                    <Button className="bg-ecoBlue hover:bg-ecoBlue-dark">
+                      View Consumption Goals
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

@@ -83,7 +83,7 @@ const Login = () => {
       if (user) {
         toast({
           title: "Login Successful",
-          description: `Welcome back, ${user.name}!`,
+          description: `Welcome back, ${user.username}!`,
         });
         
         // Navigate to the page they were trying to access, or home

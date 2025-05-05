@@ -16,7 +16,7 @@ export const userService = {
       // Mock implementation
       const mockUser = {
         id: generateId(),
-        name: userData.name,
+        username: userData.username,
         email: userData.email,
         password: userData.password,
         notifications: userData.notifications,
@@ -46,7 +46,7 @@ export const userService = {
     }
     
     const newUser = {
-      name: userData.name,
+      username: userData.username,
       email: userData.email,
       password: userData.password, // In a real app, this would be handled by Supabase Auth
       notifications: userData.notifications,
@@ -67,7 +67,7 @@ export const userService = {
     // Convert from DB schema to app model
     return {
       id: data.id,
-      name: data.name,
+      username: data.username,
       email: data.email,
       password: data.password,
       notifications: data.notifications,
@@ -88,7 +88,7 @@ export const userService = {
     
     return {
       id: data.id,
-      name: data.name,
+      username: data.username,
       email: data.email,
       password: data.password,
       notifications: data.notifications,
@@ -109,7 +109,7 @@ export const userService = {
     
     return {
       id: data.id,
-      name: data.name,
+      username: data.username,
       email: data.email,
       password: data.password,
       notifications: data.notifications,
@@ -122,7 +122,7 @@ export const userService = {
   update: async (id: string, userData: Partial<User>): Promise<User | null> => {
     const updateData: any = {};
     
-    if (userData.name) updateData.name = userData.name;
+    if (userData.username) updateData.username = userData.username;
     if (userData.email) updateData.email = userData.email;
     if (userData.password) updateData.password = userData.password;
     if (userData.notifications !== undefined) updateData.notifications = userData.notifications;
@@ -140,7 +140,7 @@ export const userService = {
     
     return {
       id: data.id,
-      name: data.name,
+      username: data.username,
       email: data.email,
       password: data.password,
       notifications: data.notifications,
@@ -168,7 +168,7 @@ export const userService = {
       const mockUsers = [
         {
           id: "1",
-          name: "Emma Wilson",
+          username: "EmmaW",
           email: "emma@example.com",
           password: "password123",
           notifications: true,
@@ -178,7 +178,7 @@ export const userService = {
         },
         {
           id: "2",
-          name: "James Carter",
+          username: "JamesC",
           email: "james@example.com",
           password: "password123",
           notifications: true,
@@ -188,7 +188,7 @@ export const userService = {
         },
         {
           id: "3",
-          name: "Olivia Martinez",
+          username: "OliviaM",
           email: "olivia@example.com",
           password: "password123",
           notifications: false,
@@ -198,7 +198,7 @@ export const userService = {
         },
         {
           id: "4",
-          name: "Noah Thompson",
+          username: "NoahT",
           email: "noah@example.com",
           password: "password123",
           notifications: true,
@@ -208,7 +208,7 @@ export const userService = {
         },
         {
           id: "5",
-          name: "Sophia Lee",
+          username: "SophiaL",
           email: "sophia@example.com",
           password: "password123",
           notifications: true,
@@ -230,7 +230,7 @@ export const userService = {
     
     return data.map(user => ({
       id: user.id,
-      name: user.name,
+      username: user.username,
       email: user.email,
       password: user.password,
       notifications: user.notifications,
@@ -251,7 +251,7 @@ export const userService = {
     
     return data.map((user, index) => ({
       id: user.id,
-      name: user.name,
+      username: user.username,
       email: user.email,
       password: user.password,
       notifications: user.notifications,

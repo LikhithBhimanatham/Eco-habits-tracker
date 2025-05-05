@@ -24,7 +24,7 @@ const Leaderboard = () => {
         const users = await userService.getAll();
         const transformedUsers = users.map((user, index) => ({
           id: user.id,
-          name: user.name,
+          name: user.username,
           points: user.points,
           savingsPercent: user.savingsPercent,
           rank: index + 1,

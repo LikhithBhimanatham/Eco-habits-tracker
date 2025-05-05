@@ -17,7 +17,7 @@ export function CurrentUserDisplay({ currentUser }: CurrentUserDisplayProps) {
       <AlertDescription className="text-blue-700">
         <div className="grid grid-cols-[80px_1fr] gap-1 mt-2">
           <span className="font-medium">User ID:</span>
-          <span>{currentUser.name}</span>
+          <span>{currentUser.username}</span>
           
           <span className="font-medium">Email:</span>
           <span>{currentUser.email}</span>

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthWrapper } from "@/components/auth/AuthWrapper";
 import Index from "./pages/Index";
 import WaterBill from "./pages/WaterBill";
@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Tips from "./pages/Tips";
 import ConsumptionGoals from "./pages/ConsumptionGoals";
 import BillsSummary from "./pages/BillsSummary";
+import Login from "./pages/Login";
 import { useEffect } from "react";
 import { initializeDemoData } from "@/db/db-service";
 
@@ -33,8 +34,9 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AuthWrapper>
-            <Routes>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route element={<AuthWrapper />}>
               <Route path="/" element={<Index />} />
               <Route path="/water-bill" element={<WaterBill />} />
               <Route path="/electricity-bill" element={<ElectricityBill />} />
@@ -46,8 +48,8 @@ const App = () => {
               <Route path="/consumption-goals" element={<ConsumptionGoals />} />
               <Route path="/bills-summary" element={<BillsSummary />} />
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AuthWrapper>
+            </Route>
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

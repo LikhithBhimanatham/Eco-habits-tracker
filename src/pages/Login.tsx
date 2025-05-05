@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Mail, KeyRound, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ProfileFormValues } from "@/components/user/types";
+import { authService, userService } from "@/db/db-service";
 
 // Define the schema for login
 const loginSchema = z.object({
@@ -42,6 +42,8 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/";
 
   // Initialize login form
   const loginForm = useForm<LoginFormValues>({
@@ -63,51 +65,48 @@ const Login = () => {
   });
 
   const handleLoginSubmit = (data: LoginFormValues) => {
-    // Check if user exists in localStorage
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      const profile = JSON.parse(savedProfile);
-      if (profile.email === data.email && profile.password === data.password) {
-        // Set auth status in localStorage
-        localStorage.setItem("isAuthenticated", "true");
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
-        
-        // Redirect to home page
-        navigate("/");
-        return;
-      }
+    try {
+      // Try to login with provided credentials
+      authService.login(data.email, data.password);
+      
+      // Navigate to the page they were trying to access, or home
+      navigate(from, { state: { successLogin: true } });
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid email or password.",
+        variant: "destructive",
+      });
     }
-    
-    toast({
-      title: "Login Failed",
-      description: "Invalid email or password.",
-      variant: "destructive",
-    });
   };
 
   const handleSignupSubmit = (data: SignupFormValues) => {
-    // Store in localStorage (this is just for demo, in a real app use a secure backend)
-    const profileToSave: ProfileFormValues = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      notifications: true,
-    };
-    
-    localStorage.setItem("userProfile", JSON.stringify(profileToSave));
-    localStorage.setItem("isAuthenticated", "true");
-    
-    toast({
-      title: "Account Created",
-      description: "Your account has been created successfully.",
-    });
-    
-    // Redirect to home page
-    navigate("/");
+    try {
+      // Create new user
+      userService.create({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        notifications: true,
+      });
+      
+      // Auto login after successful registration
+      authService.login(data.email, data.password);
+      
+      toast({
+        title: "Account Created",
+        description: "Your account has been created successfully.",
+      });
+      
+      // Navigate to home page or original destination
+      navigate(from, { state: { successLogin: true } });
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Could not create account.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
